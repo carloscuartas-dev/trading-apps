@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0E1410">
+<title>Risk Desk</title>
+<style>
+:root{
+  --bg:#0E1410; --panel:#161E18; --line:#2A352D;
+  --ink:#E8EDE6; --dim:#8FA092; --faint:#5C6B5F;
+  --gold:#C9A857; --gold-dim:#8A7438; --gold-bg:rgba(201,168,87,0.09);
+  --green:#5FA876; --green-bg:#1A3326;
+  --red:#C76258; --red-bg:#3A1F1E;
+  --blue:#5B9BD5; --blue-bg:#162030;
+  --r:10px; --r-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  min-height:100vh;padding-bottom:env(safe-area-inset-bottom,16px);
+}
+.wrap{max-width:480px;margin:0 auto;padding:20px 16px;}
+
+/* header */
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+.brand{font-size:22px;font-weight:700;letter-spacing:-.02em;}
+.brand span{color:var(--gold);}
+.date{font-size:12px;color:var(--faint);}
+
+/* card */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:16px;}
+
+/* section label */
+.sec{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);font-weight:600;margin-bottom:12px;}
+
+/* form */
+.fields{display:flex;flex-direction:column;gap:12px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.field{display:flex;flex-direction:column;gap:5px;}
+label{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--faint);}
+input,select{
+  background:var(--bg);border:1px solid var(--line);color:var(--ink);
+  padding:13px 12px;border-radius:var(--r-sm);font-size:16px;width:100%;
+  -webkit-appearance:none;appearance:none;transition:border-color .15s;
+}
+input:focus,select:focus{outline:none;border-color:var(--gold-dim);}
+select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%235C6B5F' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 13px center;padding-right:32px;
+}
+.currency-wrap{position:relative;}
+.currency-wrap input{padding-left:28px;}
+.currency-sym{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--faint);font-size:16px;pointer-events:none;}
+
+/* button */
+.btn{
+  width:100%;padding:15px;border-radius:var(--r-sm);border:none;
+  font-size:16px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s;
+  letter-spacing:.01em;margin-top:4px;
+}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:var(--gold);color:#14180F;}
+.btn-primary:hover{opacity:.9;}
+
+/* alert */
+.alert{
+  padding:11px 13px;border-radius:var(--r-sm);font-size:13px;
+  border-left:3px solid;margin-bottom:12px;line-height:1.5;
+}
+.ok{background:var(--green-bg);border-color:var(--green);color:#9ED4B2;}
+.warn{background:var(--red-bg);border-color:var(--red);color:#E8A49D;}
+.info{background:var(--blue-bg);border-color:var(--blue);color:#9EC4E8;}
+
+/* result hero */
+.hero{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid var(--line);}
+.lot-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);margin-bottom:4px;}
+.lot-val{font-size:52px;font-weight:700;color:var(--gold);line-height:1;}
+.loss-side{text-align:right;}
+.loss-val{font-size:24px;font-weight:700;color:var(--red);}
+.loss-lbl{font-size:11px;color:var(--faint);margin-top:2px;}
+
+/* stats row */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.stat{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;}
+.stat-lbl{font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.04em;}
+.stat-val{font-size:14px;font-weight:600;color:var(--ink);margin-top:3px;}
+
+/* tp grid */
+.sub-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-bottom:8px;}
+.tp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;}
+.tp{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 12px;text-align:center;}
+.tp.qualify{border-color:#2A5540;}
+.tp-lbl{font-size:10px;color:var(--faint);text-transform:uppercase;}
+.tp.qualify .tp-lbl{color:var(--green);}
+.tp-price{font-size:14px;font-weight:600;color:var(--ink);margin:4px 0 2px;}
+.tp-gain{font-size:13px;color:var(--green);}
+
+/* split */
+.split-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.split{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 12px;text-align:center;}
+.split-lbl{font-size:10px;color:var(--faint);text-transform:uppercase;}
+.split-lot{font-size:15px;font-weight:600;color:var(--ink);margin:4px 0 2px;}
+.split-gain{font-size:12px;color:var(--green);}
+
+/* SL suggestor tabs */
+.tabs{display:flex;gap:6px;margin-bottom:14px;}
+.tab{flex:1;text-align:center;padding:10px;border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;font-size:12px;color:var(--faint);text-transform:uppercase;letter-spacing:.04em;transition:all .15s;}
+.tab.active{border-color:var(--gold-dim);color:var(--gold);background:var(--gold-bg);}
+.pane{display:none;}
+.pane.active{display:block;}
+.atr-row-item{display:grid;grid-template-columns:1fr 1fr 36px;gap:8px;margin-bottom:8px;align-items:center;}
+.add-btn{width:100%;padding:10px;background:none;border:1px dashed var(--line);color:var(--faint);border-radius:var(--r-sm);font-size:13px;cursor:pointer;margin-top:4px;}
+.add-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
+.sl-out{background:var(--bg);border:1px solid var(--gold-dim);border-radius:var(--r-sm);padding:14px 16px;margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.sl-out-val{font-size:26px;font-weight:700;color:var(--gold);}
+.sl-out-lbl{font-size:11px;color:var(--faint);margin-bottom:3px;}
+.btn-use{padding:10px 16px;border-radius:var(--r-sm);background:var(--green-bg);color:var(--green);border:1px solid var(--green);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.note{font-size:12px;color:var(--faint);line-height:1.5;margin-top:10px;}
+.del-btn{background:none;border:none;color:var(--faint);cursor:pointer;font-size:16px;padding:4px 8px;}
+.del-btn:hover{color:var(--red);}
+
+footer{text-align:center;color:var(--faint);font-size:11px;margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="brand">Risk <span>Desk</span></div>
+  <div class="date" id="dateEl"></div>
+</header>
+
+<!-- SL SUGERIDO -->
+<div class="card">
+  <div class="sec">Stop loss sugerido</div>
+  <div class="tabs">
+    <div class="tab active" data-pane="swing">Swing / Nivel</div>
+    <div class="tab" data-pane="atr">ATR</div>
+  </div>
+
+  <div class="pane active" id="paneSwing">
+    <div class="fields">
+      <div class="row2">
+        <div class="field">
+          <label>Dirección</label>
+          <select id="slSide">
+            <option value="short">Venta</option>
+            <option value="long">Compra</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Swing / resistencia</label>
+          <input type="number" inputmode="decimal" id="slLevel" step="0.01" placeholder="4270">
+        </div>
+      </div>
+      <div class="field">
+        <label>Margen de seguridad (puntos)</label>
+        <input type="number" inputmode="decimal" id="slMargin" step="1" value="10">
+      </div>
+    </div>
+    <div class="note">En venta: SL = nivel + margen · En compra: SL = nivel − margen</div>
+  </div>
+
+  <div class="pane" id="paneAtr">
+    <div class="fields">
+      <div class="row2">
+        <div class="field">
+          <label>Dirección</label>
+          <select id="slAtrSide">
+            <option value="short">Venta</option>
+            <option value="long">Compra</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Precio de entrada</label>
+          <input type="number" inputmode="decimal" id="slAtrEntry" step="0.01" placeholder="4258">
+        </div>
+      </div>
+      <div class="field">
+        <label>Multiplicador ATR</label>
+        <select id="slAtrMult">
+          <option value="1">1.0× — ajustado</option>
+          <option value="1.5" selected>1.5× — estándar</option>
+          <option value="2">2.0× — amplio</option>
+        </select>
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:8px;">Velas recientes — alto / bajo</label>
+        <div id="atrRows"></div>
+        <button class="add-btn" id="addAtrRow">+ añadir vela</button>
+      </div>
+    </div>
+    <div class="note">Mínimo 2 velas · 10–14 para un ATR más fiable</div>
+  </div>
+
+  <div class="sl-out" id="slOut" style="display:none;">
+    <div>
+      <div class="sl-out-lbl" id="slOutLbl">SL sugerido</div>
+      <div class="sl-out-val" id="slOutVal">—</div>
+    </div>
+    <button class="btn-use" id="useSlBtn">Usar ↓</button>
+  </div>
+  <button class="btn btn-primary" id="calcSlBtn" style="margin-top:14px;">Calcular SL</button>
+</div>
+
+<!-- CALCULADORA -->
+<div class="card">
+  <div class="sec">Calculadora de lote</div>
+  <div class="fields">
+    <div class="field">
+      <label>Capital disponible</label>
+      <div class="currency-wrap">
+        <span class="currency-sym" id="currSym">$</span>
+        <input type="number" inputmode="decimal" id="capital" step="0.01" placeholder="97670">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Moneda</label>
+        <select id="currency">
+          <option value="$">USD ($)</option>
+          <option value="€">EUR (€)</option>
+          <option value="£">GBP (£)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Riesgo (%)</label>
+        <input type="number" inputmode="decimal" id="riskPct" step="0.01" value="0.5" placeholder="0.5">
+      </div>
+    </div>
+    <div class="field">
+      <label>Instrumento</label>
+      <select id="instrument">
+        <option value="100">XAU/USD — oro ($100/pt·lote)</option>
+        <option value="10">EUR/USD ($10/pt·lote)</option>
+        <option value="10">GBP/USD ($10/pt·lote)</option>
+        <option value="20">NAS100 / NQ ($20/pt·lote)</option>
+        <option value="50">SPX500 / ES ($50/pt·lote)</option>
+        <option value="custom">Personalizado</option>
+      </select>
+    </div>
+    <div class="field" id="customPVField" style="display:none;">
+      <label>Valor por punto / lote</label>
+      <input type="number" inputmode="decimal" id="customPV" step="1" placeholder="100">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Precio de entrada</label>
+        <input type="number" inputmode="decimal" id="entryPrice" step="0.01" placeholder="4258">
+      </div>
+      <div class="field">
+        <label>Stop loss</label>
+        <input type="number" inputmode="decimal" id="slPrice" step="0.01" placeholder="4276">
+      </div>
+    </div>
+    <div class="field">
+      <label>Objetivo qualifying (opcional)</label>
+      <input type="number" inputmode="decimal" id="qualPct" step="0.01" placeholder="0.5 — mínimo % de ganancia del día">
+    </div>
+  </div>
+  <button class="btn btn-primary" id="calcBtn">Calcular lote</button>
+</div>
+
+<!-- RESULTADO -->
+<div class="card" id="resultCard" style="display:none;">
+  <div class="sec">Resultado</div>
+  <div id="alertBox"></div>
+  <div class="hero">
+    <div>
+      <div class="lot-lbl">Lote recomendado</div>
+      <div class="lot-val" id="outLot">—</div>
+    </div>
+    <div class="loss-side">
+      <div class="loss-val" id="outLoss">—</div>
+      <div class="loss-lbl">pérdida máx si toca SL</div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-lbl">Riesgo real</div><div class="stat-val" id="outPct">—</div></div>
+    <div class="stat"><div class="stat-lbl">Distancia SL</div><div class="stat-val" id="outDist">—</div></div>
+    <div class="stat"><div class="stat-lbl">Val/punto</div><div class="stat-val" id="outPV">—</div></div>
+  </div>
+
+  <div class="sub-lbl">Take profit TP1–TP4 (1R–4R)</div>
+  <div class="tp-grid" id="tpGrid"></div>
+
+  <div class="sub-lbl" style="margin-top:16px;">División en 4 tramos</div>
+  <div class="split-grid" id="splitGrid"></div>
+</div>
+
+<footer>Sin conexión requerida · No es asesoramiento financiero</footer>
+</div>
+
+<script>
+document.getElementById('dateEl').textContent =
+  new Date().toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+
+/* ── currency symbol sync ── */
+document.getElementById('currency').onchange = e => {
+  document.getElementById('currSym').textContent = e.target.value;
+};
+
+/* ── instrument custom field ── */
+document.getElementById('instrument').onchange = e => {
+  document.getElementById('customPVField').style.display = e.target.value === 'custom' ? 'block' : 'none';
+};
+
+/* ── SL SUGGESTOR ── */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('pane' + (tab.dataset.pane === 'swing' ? 'Swing' : 'Atr')).classList.add('active');
+    document.getElementById('slOut').style.display = 'none';
+  };
+});
+
+function addAtrRow(h = '', l = '') {
+  const wrap = document.getElementById('atrRows');
+  const row = document.createElement('div');
+  row.className = 'atr-row-item';
+  row.innerHTML = `
+    <input type="number" inputmode="decimal" step="0.01" placeholder="Alto" class="atr-h" value="${h}">
+    <input type="number" inputmode="decimal" step="0.01" placeholder="Bajo" class="atr-l" value="${l}">
+    <button class="del-btn" onclick="this.closest('.atr-row-item').remove()">✕</button>
+  `;
+  wrap.appendChild(row);
+}
+for (let i = 0; i < 3; i++) addAtrRow();
+document.getElementById('addAtrRow').onclick = () => addAtrRow();
+
+let lastSL = null;
+document.getElementById('calcSlBtn').onclick = () => {
+  const pane = document.querySelector('.tab.active').dataset.pane;
+  const out = document.getElementById('slOut');
+  if (pane === 'swing') {
+    const side = document.getElementById('slSide').value;
+    const level = parseFloat(document.getElementById('slLevel').value);
+    const margin = parseFloat(document.getElementById('slMargin').value) || 0;
+    if (isNaN(level)) { alert('Introduce el nivel de swing.'); return; }
+    lastSL = side === 'short' ? level + margin : level - margin;
+    document.getElementById('slOutLbl').textContent = `SL sugerido · swing ${side === 'short' ? '+' : '−'} ${margin} pts`;
+  } else {
+    const side = document.getElementById('slAtrSide').value;
+    const entry = parseFloat(document.getElementById('slAtrEntry').value);
+    const mult = parseFloat(document.getElementById('slAtrMult').value);
+    const ranges = [...document.querySelectorAll('.atr-row-item')].map(r => {
+      const h = parseFloat(r.querySelector('.atr-h').value);
+      const l = parseFloat(r.querySelector('.atr-l').value);
+      return (!isNaN(h) && !isNaN(l)) ? Math.abs(h - l) : null;
+    }).filter(v => v !== null);
+    if (ranges.length < 2 || isNaN(entry)) { alert('Introduce la entrada y al menos 2 velas.'); return; }
+    const atr = ranges.reduce((a, b) => a + b, 0) / ranges.length;
+    lastSL = side === 'short' ? entry + atr * mult : entry - atr * mult;
+    document.getElementById('slOutLbl').textContent = `ATR(${ranges.length}) = ${atr.toFixed(2)} × ${mult}`;
+    if (!document.getElementById('entryPrice').value) document.getElementById('entryPrice').value = entry;
+  }
+  document.getElementById('slOutVal').textContent = lastSL.toFixed(2);
+  out.style.display = 'flex';
+};
+
+document.getElementById('useSlBtn').onclick = () => {
+  if (lastSL === null) return;
+  document.getElementById('slPrice').value = lastSL.toFixed(2);
+  const pane = document.querySelector('.tab.active').dataset.pane;
+  if (pane === 'atr') {
+    const e = parseFloat(document.getElementById('slAtrEntry').value);
+    if (!isNaN(e) && !document.getElementById('entryPrice').value) document.getElementById('entryPrice').value = e;
+  }
+  const entryReady = !!document.getElementById('entryPrice').value && !!document.getElementById('capital').value;
+  if (entryReady) document.getElementById('calcBtn').click();
+  else document.getElementById('capital').scrollIntoView({ behavior: 'smooth', block: 'center' });
+};
+
+/* ── CALCULATOR ── */
+document.getElementById('calcBtn').onclick = () => {
+  const cur = document.getElementById('currency').value;
+  const capital = parseFloat(document.getElementById('capital').value);
+  const riskPct = parseFloat(document.getElementById('riskPct').value);
+  const instVal = document.getElementById('instrument').value;
+  const pv = instVal === 'custom' ? parseFloat(document.getElementById('customPV').value) : parseFloat(instVal);
+  const entry = parseFloat(document.getElementById('entryPrice').value);
+  const sl = parseFloat(document.getElementById('slPrice').value);
+  const qualPct = parseFloat(document.getElementById('qualPct').value);
+  const alertBox = document.getElementById('alertBox');
+  alertBox.innerHTML = '';
+
+  if (isNaN(capital) || capital <= 0) { alertBox.innerHTML = '<div class="alert warn">Introduce el capital disponible.</div>'; document.getElementById('resultCard').style.display = 'block'; return; }
+  if (isNaN(entry) || isNaN(sl) || entry === sl) { alertBox.innerHTML = '<div class="alert warn">Entrada y stop loss son obligatorios y deben ser distintos.</div>'; document.getElementById('resultCard').style.display = 'block'; return; }
+  if (isNaN(pv) || pv <= 0) { alertBox.innerHTML = '<div class="alert warn">Introduce un valor por punto válido.</div>'; document.getElementById('resultCard').style.display = 'block'; return; }
+
+  const dist = Math.abs(sl - entry);
+  const isShort = sl > entry;
+  const riskDollars = capital * (riskPct / 100);
+  let lots = riskDollars / (dist * pv);
+  lots = Math.floor(lots * 100) / 100;
+  if (lots < 0.01) lots = 0.01;
+  const actualLoss = lots * dist * pv;
+  const actualPct = actualLoss / capital * 100;
+
+  document.getElementById('outLot').textContent = lots.toFixed(2);
+  document.getElementById('outLoss').textContent = '-' + cur + actualLoss.toFixed(2);
+  document.getElementById('outPct').textContent = actualPct.toFixed(2) + '%';
+  document.getElementById('outDist').textContent = dist.toFixed(2) + ' pts';
+  document.getElementById('outPV').textContent = cur + pv + '/pt';
+
+  if (actualPct > riskPct + 0.1)
+    alertBox.innerHTML = `<div class="alert warn">Lote mínimo (0.01) hace que el riesgo real (${actualPct.toFixed(2)}%) supere ligeramente el ${riskPct}% objetivo.</div>`;
+  else
+    alertBox.innerHTML = `<div class="alert ok">Riesgo real: ${actualPct.toFixed(2)}% — dentro del ${riskPct}% permitido.</div>`;
+
+  const qualThresh = !isNaN(qualPct) && qualPct > 0 ? capital * (qualPct / 100) : null;
+
+  const tpGrid = document.getElementById('tpGrid');
+  tpGrid.innerHTML = '';
+  const tpData = [];
+  for (let r = 1; r <= 4; r++) {
+    const tpDist = dist * r;
+    const tpPrice = isShort ? entry - tpDist : entry + tpDist;
+    const gain = lots * tpDist * pv;
+    const q = qualThresh !== null && gain >= qualThresh;
+    tpData.push({ r, tpDist, tpPrice, gain, q });
+    const c = document.createElement('div');
+    c.className = 'tp' + (q ? ' qualify' : '');
+    c.innerHTML = `<div class="tp-lbl">TP${r} · ${r}R${q ? ' ✓ qualifying' : ''}</div><div class="tp-price">${tpPrice.toFixed(2)}</div><div class="tp-gain">+${cur}${gain.toFixed(2)}</div>`;
+    tpGrid.appendChild(c);
+  }
+
+  const splitGrid = document.getElementById('splitGrid');
+  splitGrid.innerHTML = '';
+  const q4 = Math.floor((lots / 4) * 100) / 100;
+  const quarters = [q4, q4, q4, Math.round((lots - q4 * 3) * 100) / 100];
+  tpData.forEach((tp, i) => {
+    const pg = quarters[i] * tp.tpDist * pv;
+    const c = document.createElement('div');
+    c.className = 'split';
+    c.innerHTML = `<div class="split-lbl">Tramo ${i + 1} · TP${i + 1}</div><div class="split-lot">${quarters[i].toFixed(2)} lotes</div><div class="split-gain">+${cur}${pg.toFixed(2)}</div>`;
+    splitGrid.appendChild(c);
+  });
+
+  document.getElementById('resultCard').style.display = 'block';
+  document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+</body>
+</html>
